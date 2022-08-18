@@ -350,6 +350,33 @@ impl Kem {
         Ok((pk, sk))
     }
 
+    /// Derive a keypair from a seed
+    pub fn derive_keypair<'a>(
+        &self,
+        ikm: &'a [u8]
+    ) -> Result<(PublicKey, SecretKey)> {
+        if ikm.len() != 64 {
+            return Err(Error::InvalidLength);
+        }
+        let kem = unsafe { self.kem.as_ref() };
+        let func = kem.derive_keypair.unwrap();
+        let mut pk = PublicKey {
+            bytes: Vec::with_capacity(kem.length_public_key),
+        };
+        let mut sk = SecretKey {
+            bytes: Vec::with_capacity(kem.length_secret_key),
+        };
+        let status = unsafe { func(ikm.as_ptr(), pk.bytes.as_mut_ptr(), sk.bytes.as_mut_ptr()) };
+        status_to_result(status)?;
+        // update the lengths of the vecs
+        // this is safe to do as we have initialised them now.
+        unsafe {
+            pk.bytes.set_len(kem.length_public_key);
+            sk.bytes.set_len(kem.length_secret_key);
+        }
+        Ok((pk,sk))
+    }
+
     /// Encapsulate to the provided public key
     pub fn encapsulate<'a, P: Into<PublicKeyRef<'a>>>(
         &self,
