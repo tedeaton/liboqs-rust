@@ -1,3 +1,3 @@
-[submodule "liboqs"]
+[submodule "oqs-sys/liboqs"]
 	path = oqs-sys/liboqs
-	url = git@github.com:tedeaton/liboqs.git
+	url = https://github.com/tedeaton/liboqs.git
